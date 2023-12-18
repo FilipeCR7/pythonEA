@@ -28,10 +28,11 @@ def insert_data_into_db(data):
     VALUES (%s, %s, %s, %s, %s, %s)
     """
     try:
-        cursor.executemany(query, data)
+        cursor.executemany(query, data)  # Change back to executemany
         connection.commit()
     except mysql.connector.Error as e:
         print(f"Error: {e}")
         connection.rollback()
     finally:
         close_db_connection(connection)
+
