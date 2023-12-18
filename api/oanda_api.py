@@ -70,3 +70,21 @@ class OandaAPI:
         url = f"{self.api_base_url}/accounts/{self.account_id}/trades/{trade_id}/close"
         response = requests.put(url, headers=self.headers)
         return response.json()
+
+    def get_historical_data(self, start_date, end_date):
+        url = f"{self.api_base_url}/instruments/USD_CAD/candles"
+        params = {
+            "from": start_date,
+            "to": end_date,
+            "granularity": "M1",
+            "price": "M"
+        }
+        response = requests.get(url, headers=self.headers, params=params)
+        return response.json()
+
+# Example usage:
+# oanda_api = OandaAPI(account_id)
+# historical_data = oanda_api.get_historical_data("2023-01-01T00:00:00Z", "2023-01-02T00:00:00Z")
+
+
+
