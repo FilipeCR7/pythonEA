@@ -24,7 +24,7 @@ def store_historical_data(processed_data):
 if __name__ == "__main__":
     oanda_api = OandaAPI()  # Initialize with necessary parameters
     end_datetime = datetime.datetime.utcnow().isoformat() + 'Z'  # Current UTC time in ISO 8601 format
-    start_datetime = "1990-01-01T00:00:00Z"  # Start date as far back as data is available
+    start_datetime = "2023-01-01T00:00:00Z"  # Start date as far back as data is available
     json_data = oanda_api.get_historical_data(start_datetime, end_datetime)
     processed_data = process_historical_data(json_data)
     store_historical_data(processed_data)
