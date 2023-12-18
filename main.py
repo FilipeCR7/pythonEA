@@ -1,5 +1,6 @@
 from api.oanda_api import OandaAPI
-# Import other necessary modules, like strategies or utility functions
+import sys
+sys.path.insert(0, '/Users/filipe/Code/pythonEA')
 
 def main():
     # Initialize the OandaAPI instance

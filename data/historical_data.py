@@ -1,6 +1,6 @@
-from oanda_api import OandaAPI
-from db_connection import insert_data_into_db  # Assuming you have this function in db_connection.py
-import datetime
+from api.oanda_api import OandaAPI
+from data.db_connection import insert_data_into_db
+from datetime import datetime, timezone
 
 def process_historical_data(json_data):
     # Parse the JSON response and extract relevant data
@@ -22,8 +22,8 @@ def store_historical_data(processed_data):
 
 # Example usage
 if __name__ == "__main__":
-    oanda_api = OandaAPI()  # Initialize with necessary parameters
-    end_datetime = datetime.datetime.utcnow().isoformat() + 'Z'  # Current UTC time in ISO 8601 format
+    oanda_api = OandaAPI('101-004-27721570-001')  # Initialize with necessary parameters
+    end_datetime = datetime.now(timezone.utc).isoformat() # Current UTC time in ISO 8601 format
     start_datetime = "2023-01-01T00:00:00Z"  # Start date as far back as data is available
     json_data = oanda_api.get_historical_data(start_datetime, end_datetime)
     processed_data = process_historical_data(json_data)

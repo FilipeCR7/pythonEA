@@ -1,4 +1,3 @@
-# oanda_api.py
 from config import API_KEY
 
 import requests
