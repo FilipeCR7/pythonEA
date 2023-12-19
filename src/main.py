@@ -1,34 +1,27 @@
-from api.oanda_api import OandaAPI
+import argparse
+import importlib
 import sys
-sys.path.insert(0, '/Users/filipe/Code/pythonEA')
 
 def main():
-    # Initialize the OandaAPI instance
-    account_id = "101-004-27721570-001"  # Replace with your actual account ID
-    oanda_api = OandaAPI(account_id)
+    parser = argparse.ArgumentParser(description="Run a script's main function")
+    parser.add_argument('--script', help='Name of the script to run (without .py)', required=True)
+    args = parser.parse_args()
 
-    # Example: Get account details
-    account_details = oanda_api.get_account_details()
-    print('Printing account details:')
-    print(account_details)
+    script_name = args.script
 
-    # Example: Get pricing for USD/CAD
-    pricing_info = oanda_api.get_pricing("USD_CAD")
-    print('Printing price info:')
-    print(pricing_info)
+    try:
+        # Dynamically import the module
+        module = importlib.import_module(script_name)
 
-    # Here, you can also initialize and execute your trading strategies,
-    # perform data analysis, backtesting, etc.
-    # Initialization and existing code...
+        # Check if the module has a main() function and call it
+        if hasattr(module, 'main'):
+            module.main()
+        else:
+            print(f"The script {script_name} does not have a main() function.")
 
-    # Test creating a market order
-    oanda_api.create_market_order("USD_CAD", 1000)
-
-    # Test creating a limit order
-    oanda_api.create_limit_order("USD_CAD", 1000, 1.1500)
-
-    # Test creating a stop order
-    oanda_api.create_stop_order("USD_CAD", -1000, 1.1400)
+    except ModuleNotFoundError:
+        print(f"Script {script_name} not found.")
 
 if __name__ == "__main__":
+    sys.path.insert(0, './src')  # Add src directory to system path
     main()

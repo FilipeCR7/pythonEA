@@ -1,7 +1,6 @@
 from src.api.oanda_api import OandaAPI
 from src.data.db_connection import insert_data_into_db
-from datetime import timezone
-from datetime import datetime
+from datetime import datetime, timezone
 
 def process_historical_data(json_data):
     if 'candles' not in json_data:
@@ -22,13 +21,12 @@ def process_historical_data(json_data):
         processed_data.append((time, open_price, high_price, low_price, close_price, volume))
     return processed_data
 
-
 def store_historical_data(processed_data):
     # Store the processed data in the database
     if processed_data:
         insert_data_into_db(processed_data)
-# Example usage
-if __name__ == "__main__":
+
+def main():
     oanda_api = OandaAPI('101-004-27721570-001')
     end_datetime = datetime.now(timezone.utc).isoformat()
     start_datetime = "2023-12-17T00:00:00Z"
@@ -39,3 +37,5 @@ if __name__ == "__main__":
 
     store_historical_data(processed_data)
 
+if __name__ == "__main__":
+    main()
