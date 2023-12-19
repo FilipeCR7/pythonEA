@@ -1,6 +1,6 @@
-from api.oanda_api import OandaAPI
-from data.db_connection import insert_data_into_db
-from datetime import datetime, timezone
+from src.api.oanda_api import OandaAPI
+from src.data.db_connection import insert_data_into_db
+from datetime import timezone
 from datetime import datetime
 
 def process_historical_data(json_data):
@@ -9,8 +9,11 @@ def process_historical_data(json_data):
         return []
     processed_data = []
     for candle in json_data['candles']:
-        # Convert ISO 8601 to MySQL datetime format
-        time = datetime.fromisoformat(candle['time'].replace('Z', '+00:00')).strftime('%Y-%m-%d %H:%M:%S')
+        # Remove nanoseconds and replace 'Z' with '+00:00'
+        time_str = candle['time'].split('.')[0]
+        if time_str.endswith('Z'):
+            time_str = time_str.replace('Z', '+00:00')
+        time = datetime.fromisoformat(time_str).strftime('%Y-%m-%d %H:%M:%S')
         open_price = candle['mid']['o']
         high_price = candle['mid']['h']
         low_price = candle['mid']['l']

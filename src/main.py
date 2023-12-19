@@ -14,7 +14,7 @@ def main():
 
     # Example: Get pricing for USD/CAD
     pricing_info = oanda_api.get_pricing("USD_CAD")
-    print('Pringing price info:')
+    print('Printing price info:')
     print(pricing_info)
 
     # Here, you can also initialize and execute your trading strategies,
