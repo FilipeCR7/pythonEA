@@ -9,10 +9,12 @@ def main():
 
     # Example: Get account details
     account_details = oanda_api.get_account_details()
+    print('Printing account details:')
     print(account_details)
 
     # Example: Get pricing for USD/CAD
     pricing_info = oanda_api.get_pricing("USD_CAD")
+    print('Pringing price info:')
     print(pricing_info)
 
     # Here, you can also initialize and execute your trading strategies,
