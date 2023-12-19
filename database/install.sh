@@ -6,7 +6,13 @@ DB_PASS="root"
 DB_NAME="pythonea"
 
 # SQL file path
-SQL_FILE="init.sql"
+
+# Determine the project root directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# SQL file path relative to the project root
+SQL_FILE="$PROJECT_ROOT/database/init.sql"
 
 # Create a new database
 mysql -u"$DB_USER" -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"

@@ -1,4 +1,7 @@
 ## Python EA
 
-Getting setup.
+To setup the database run:
 
+```
+sh database/install.sh
+```
