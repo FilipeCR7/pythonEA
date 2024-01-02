@@ -1,24 +1,36 @@
-# strategies/statistical_arbitrage.py
 import numpy as np
+import pandas as pd
+
 
 class StatisticalArbitrageStrategy:
-    def __init__(self, historical_data_pair1, historical_data_pair2, threshold=0.02):
-        self.data1 = historical_data_pair1
-        self.data2 = historical_data_pair2
+    def __init__(self, df_pair1, df_pair2, threshold=0.02):
+        """
+        Initialize the strategy with DataFrames for two currency pairs.
+
+        :param df_pair1: Pandas DataFrame for the first currency pair (e.g., USD/CAD).
+        :param df_pair2: Pandas DataFrame for the second currency pair.
+        :param threshold: Threshold for identifying significant spread deviations.
+        """
+        self.df_pair1 = df_pair1
+        self.df_pair2 = df_pair2
         self.threshold = threshold
 
     def calculate_spread(self):
-        prices1 = [float(data[4]) for data in self.data1]  # Close prices are at index 4
-        prices2 = [float(data[4]) for data in self.data2]
-
-        return np.array(prices1) - np.array(prices2)
+        """
+        Calculate the spread between the two currency pairs.
+        """
+        spread = self.df_pair1['close'] - self.df_pair2['close']
+        return spread
 
     def generate_signals(self):
+        """
+        Generate trading signals based on the spread's deviation from its mean.
+        """
         spread = self.calculate_spread()
-        mean_spread = np.mean(spread)
-        std_spread = np.std(spread)
+        mean_spread = spread.mean()
+        std_spread = spread.std()
 
-        current_spread = spread[-1]
+        current_spread = spread.iloc[-1]
 
         if current_spread > mean_spread + self.threshold * std_spread:
             return "SELL Pair 1 (USD/CAD), BUY Pair 2"
@@ -27,20 +39,8 @@ class StatisticalArbitrageStrategy:
         else:
             return "HOLD"
 
-# Example usage in your main script:
-# main.py or another appropriate script in your project
-from strategies.statistical_arbitrage import StatisticalArbitrageStrategy
-# Assuming you have this function to fetch data from your database
-from your_data_fetching_module import fetch_historical_data_from_db
-
-def main():
-    # Replace 'EUR_USD' with another currency pair that you want to compare with USD/CAD
-    historical_data_usdcad = fetch_historical_data_from_db('USD_CAD')
-    historical_data_pair2 = fetch_historical_data_from_db('EUR_USD')
-
-    strategy = StatisticalArbitrageStrategy(historical_data_usdcad, historical_data_pair2)
-    signal = strategy.generate_signals()
-    print(f"Statistical Arbitrage Signal: {signal}")
-
-if __name__ == "__main__":
-    main()
+# Example usage
+# Assuming you have DataFrames 'df_usdcad' and 'df_eurusd' from your historical_data.py
+# strategy = StatisticalArbitrageStrategy(df_usdcad, df_eurusd)
+# signal = strategy.generate_signals()
+# print(signal)
