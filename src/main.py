@@ -37,7 +37,15 @@ def run_mean_reversion_test():
 
 
 def run_time_series_analysis_test():
-    ts_analysis = TimeSeriesAnalysis()
+    # Fetch data from the database
+    df = fetch_historical_data()
+
+    if df is None or df.empty:
+        print("No data fetched from the database.")
+        return
+
+    # Pass the dataframe to TimeSeriesAnalysis
+    ts_analysis = TimeSeriesAnalysis(df)
 
     # Fit ARIMA model
     ts_analysis.fit_arima()
@@ -45,7 +53,7 @@ def run_time_series_analysis_test():
     # Fit GARCH model
     ts_analysis.fit_garch()
 
-    # Training the LSTM model
+    # Train the LSTM model
     ts_analysis.fit_lstm()
 
 
