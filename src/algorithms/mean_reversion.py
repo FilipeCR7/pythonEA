@@ -1,31 +1,22 @@
 from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
-from data.db_connection import create_db_connection, close_db_connection  # Ensure correct import
+from data.db_connection import create_db_connection, close_db_connection
 
 
 class MeanReversionStrategy:
     def __init__(self, df, window=20, std_dev_multiplier=2):
-        """
-        Initialize the Mean Reversion Strategy.
-        :param df: DataFrame containing historical price data.
-        :param window: Rolling window size for the moving average.
-        :param std_dev_multiplier: Multiplier for standard deviation.
-        """
         self.df = df
         self.window = window
         self.std_dev_multiplier = std_dev_multiplier
 
     def generate_signals(self):
-        """
-        Generate buy/sell/hold signals based on the mean reversion strategy.
-        """
         # Calculate the moving average and upper/lower bands
         self.df[f'sma_{self.window}'] = self.df['close'].rolling(window=self.window).mean()
         self.df['lower_bound'] = self.df[f'sma_{self.window}'] - (
-                    self.std_dev_multiplier * self.df['close'].rolling(window=self.window).std())
+            self.std_dev_multiplier * self.df['close'].rolling(window=self.window).std())
         self.df['upper_bound'] = self.df[f'sma_{self.window}'] + (
-                    self.std_dev_multiplier * self.df['close'].rolling(window=self.window).std())
+            self.std_dev_multiplier * self.df['close'].rolling(window=self.window).std())
 
         # Get current price and bounds
         current_price = self.df['close'].iloc[-1]
@@ -45,26 +36,18 @@ class MeanReversionStrategy:
         volatility_score = self.calculate_volatility_score()
 
         # Insert into the scorecard table
-        self.insert_scorecard_data(strategy_name="Mean Reversion", signal=signal, roi=roi, sharpe_ratio=sharpe_ratio,
-                                   volatility_score=volatility_score)
+        self.insert_scorecard_data(strategy_name="Mean Reversion", signal=signal, roi=roi,
+                                   sharpe_ratio=sharpe_ratio, volatility_score=volatility_score)
 
         return signal
 
     def calculate_roi(self):
-        """
-        Calculate Return on Investment (ROI).
-        :return: ROI as a decimal value.
-        """
         initial_price = self.df['close'].iloc[0]
         final_price = self.df['close'].iloc[-1]
         roi = (final_price - initial_price) / initial_price
         return round(roi, 4)
 
     def calculate_sharpe_ratio(self):
-        """
-        Calculate the Sharpe Ratio.
-        :return: Sharpe Ratio as a decimal value.
-        """
         risk_free_rate = 0.01  # Assuming a 1% annual risk-free return
         returns = self.df['close'].pct_change().dropna()
         excess_returns = returns.mean() - risk_free_rate / 252  # Adjust for daily data
@@ -72,33 +55,23 @@ class MeanReversionStrategy:
         return round(sharpe_ratio, 4)
 
     def calculate_volatility_score(self):
-        """
-        Calculate the volatility score.
-        :return: Volatility score as a decimal value.
-        """
-        volatility = self.df['close'].pct_change().rolling(window=20).std().mean() * np.sqrt(
-            252)  # Annualized volatility
+        volatility = self.df['close'].pct_change().rolling(window=20).std().mean() * np.sqrt(252)
         return round(volatility, 4)
 
     def insert_scorecard_data(self, strategy_name, signal, roi, sharpe_ratio, volatility_score):
-        """
-        Insert the strategy results into the scorecard table.
-        """
         connection = create_db_connection()
         query = """
             INSERT INTO scorecard (timestamp, strategy_name, signal, roi, sharpe_ratio, volatility_score)
             VALUES (NOW(), %s, %s, %s, %s, %s)
         """
         try:
-            connection.execute(query, (
-            strategy_name, signal, roi, sharpe_ratio, volatility_score))  # Use tuple instead of list
+            connection.execute(query, (strategy_name, signal, roi, sharpe_ratio, volatility_score))
         except Exception as e:
             print(f"Error inserting scorecard data: {e}")
         finally:
             close_db_connection(connection)
 
 
-# Example usage
 if __name__ == "__main__":
     df = fetch_historical_data()  # Assuming fetch_historical_data is defined elsewhere
     strategy = MeanReversionStrategy(df)
