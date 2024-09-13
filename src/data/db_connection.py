@@ -52,5 +52,3 @@ def fetch_historical_data():
 
     close_db_connection(connection)
     return df
-
-

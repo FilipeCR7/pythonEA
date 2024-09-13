@@ -1,7 +1,10 @@
-from sqlalchemy import create_engine
+
+from sqlalchemy import create_engine, text
 import pandas as pd
 import numpy as np
-from data.db_connection import create_db_connection, close_db_connection
+from src.data.db_connection import create_db_connection, close_db_connection, fetch_historical_data
+from datetime import datetime
+import statsmodels
 
 
 class MeanReversionStrategy:
@@ -36,8 +39,8 @@ class MeanReversionStrategy:
         volatility_score = self.calculate_volatility_score()
 
         # Insert into the scorecard table
-        self.insert_scorecard_data(strategy_name="Mean Reversion", signal=signal, roi=roi,
-                                   sharpe_ratio=sharpe_ratio, volatility_score=volatility_score)
+        self.insert_scorecard_data(strategy_name="Mean Reversion", signal=signal, roi=float(roi),
+                                   sharpe_ratio=float(sharpe_ratio), volatility_score=float(volatility_score))
 
         return signal
 
@@ -60,14 +63,29 @@ class MeanReversionStrategy:
 
     def insert_scorecard_data(self, strategy_name, signal, roi, sharpe_ratio, volatility_score):
         connection = create_db_connection()
-        query = """
-            INSERT INTO scorecard (timestamp, strategy_name, signal, roi, sharpe_ratio, volatility_score)
-            VALUES (NOW(), %s, %s, %s, %s, %s)
-        """
+        query = text("""
+            INSERT INTO scorecard (`timestamp`, strategy_name, `signal`, roi, sharpe_ratio, volatility_score)
+            VALUES (:timestamp, :strategy_name, :signal, :roi, :sharpe_ratio, :volatility_score)
+        """)
         try:
-            connection.execute(query, (strategy_name, signal, roi, sharpe_ratio, volatility_score))
+            params = {
+                'timestamp': datetime.now(),
+                'strategy_name': strategy_name,
+                'signal': signal,
+                'roi': roi,
+                'sharpe_ratio': sharpe_ratio,
+                'volatility_score': volatility_score
+            }
+            print(query)
+            print(params)
+            print({k: type(v) for k, v in params.items()})
+
+            connection.execute(query, params)
+            connection.commit()  # Commit the transaction
+            print(f"Inserted {len(params)} ")
         except Exception as e:
             print(f"Error inserting scorecard data: {e}")
+            connection.rollback()
         finally:
             close_db_connection(connection)
 

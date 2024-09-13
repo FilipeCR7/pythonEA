@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
+from matplotlib import pyplot as plt
 from statsmodels.tsa.arima_model import ARIMA
 from arch import arch_model  # For GARCH
 from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
+from statsmodels.tsa.stattools import adfuller
 from torch.utils.data import DataLoader, TensorDataset
 from src.data.db_connection import create_db_connection
 from sklearn.metrics import mean_squared_error, mean_absolute_error
