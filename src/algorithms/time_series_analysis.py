@@ -1,18 +1,16 @@
-import datetime
+# src/algorithms/time_series_analysis.py
 
+import datetime
 import pandas as pd
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
-from arch import arch_model
+from sqlalchemy import text
+from src.data.db_connection import fetch_historical_data
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
-from src.data.db_connection import create_db_connection, close_db_connection
 import warnings
-import statsmodels
 
 warnings.filterwarnings("ignore", message="Maximum Likelihood optimization failed to converge.")
-
 
 class LSTMModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
@@ -25,18 +23,29 @@ class LSTMModel(nn.Module):
         x = self.linear(x[:, -1, :])  # Output of the last time step
         return x
 
-
 class TimeSeriesAnalysis:
     def __init__(self, df):
         self.df = df.copy()
 
-        # Ensure the dataframe index is a proper datetime index
+        # Ensure 'close' column is numeric
+        self.df['close'] = pd.to_numeric(self.df['close'], errors='coerce')
+        self.df.dropna(subset=['close'], inplace=True)
+
+        # Ensure 'timestamp' column exists and is datetime
         if 'timestamp' in self.df.columns:
-            self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+            self.df['timestamp'] = pd.to_datetime(self.df['timestamp'], errors='coerce')
+            self.df.dropna(subset=['timestamp'], inplace=True)
             self.df.set_index('timestamp', inplace=True)
+        elif 'date' in self.df.columns:
+            self.df['date'] = pd.to_datetime(self.df['date'], errors='coerce')
+            self.df.dropna(subset=['date'], inplace=True)
+            self.df.set_index('date', inplace=True)
+            self.df.index.name = 'timestamp'
+        elif isinstance(self.df.index, pd.DatetimeIndex):
+            self.df.index.name = 'timestamp'
         else:
-            print("Timestamp column not found in DataFrame.")
-            return
+            print("Error: 'timestamp' column not found in DataFrame, and index is not datetime.")
+            raise ValueError("Timestamp data is required for time series analysis.")
 
         # Remove duplicate indices
         self.df = self.df[~self.df.index.duplicated(keep='last')]
@@ -44,7 +53,25 @@ class TimeSeriesAnalysis:
         # Sort the DataFrame by index
         self.df.sort_index(inplace=True)
 
+        # Ensure the index has a frequency
+        if self.df.index.inferred_freq is None:
+            # Try to infer frequency
+            inferred_freq = pd.infer_freq(self.df.index)
+            if inferred_freq:
+                self.df = self.df.asfreq(inferred_freq)
+            else:
+                # Set a default frequency, adjust as needed
+                self.df = self.df.asfreq('T')  # 'T' for minute data; adjust if needed
+
+        # Handle missing data after setting frequency
+        self.df['close'].interpolate(method='time', inplace=True)
+
+        # Optional: Print index frequency for debugging
+        # print("Index frequency:", self.df.index.freq)
+
         self.df['returns'] = self.df['close'].pct_change().fillna(0)
+
+        self.arima_result = None  # Initialize ARIMA result
 
     def fit_arima(self, order=(5, 1, 0)):
         if len(self.df) < 10:  # Ensure there is enough data for ARIMA
@@ -55,110 +82,83 @@ class TimeSeriesAnalysis:
             model = ARIMA(self.df['close'], order=order)
             self.arima_result = model.fit()
             arima_rmse = self.calculate_arima_rmse()
-            self.insert_scorecard_data(strategy_name="ARIMA", arima_rmse=arima_rmse)
             print(f"ARIMA model fitted successfully with RMSE: {arima_rmse}")
         except Exception as e:
             print(f"Error fitting ARIMA model: {e}")
+            self.arima_result = None
 
-    def fit_garch(self):
-        if len(self.df) < 10:
-            print("Insufficient data for GARCH. Skipping model fitting.")
-            return
-
+    def get_signal(self):
         try:
-            returns = self.df['returns'] * 100
-            model = arch_model(returns, vol='Garch', p=1, q=1)
-            self.garch_result = model.fit(disp='off')
-            garch_volatility = self.garch_result.conditional_volatility.mean()
-            self.insert_scorecard_data(strategy_name="GARCH", garch_volatility=garch_volatility)
-            print(f"GARCH model fitted successfully with average volatility: {garch_volatility}")
+            if self.arima_result is None:
+                print("ARIMA model is not fitted. Returning 'HOLD' signal.")
+                return 'HOLD'
+            # Forecast the next value using the ARIMA model
+            forecast = self.arima_result.forecast(steps=1)
+            next_prediction = forecast.iloc[0]  # Use iloc[0] to avoid FutureWarning
+            last_close = self.df['close'].iloc[-1]
+            if next_prediction > last_close:
+                signal = 'BUY'
+            elif next_prediction < last_close:
+                signal = 'SELL'
+            else:
+                signal = 'HOLD'
+            return signal
         except Exception as e:
-            print(f"Error fitting GARCH model: {e}")
-
-    def fit_lstm(self, epochs=10, batch_size=32):
-        X, y = self.prepare_lstm_data()
-        if len(X) == 0:  # If no data is available for training
-            print("Insufficient data for LSTM. Skipping model fitting.")
-            return
-
-        try:
-            dataset = TensorDataset(X, y)
-            loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-            model = LSTMModel(input_dim=1, hidden_dim=50, output_dim=1)
-            criterion = nn.MSELoss()
-            optimizer = torch.optim.Adam(model.parameters())
-
-            for epoch in range(epochs):
-                for inputs, targets in loader:
-                    optimizer.zero_grad()
-                    outputs = model(inputs)
-                    loss = criterion(outputs, targets)
-                    loss.backward()
-                    optimizer.step()
-
-            self.lstm_model = model
-            lstm_rmse = self.calculate_lstm_rmse()
-            self.insert_scorecard_data(strategy_name="LSTM", lstm_rmse=lstm_rmse)
-            print(f"LSTM model fitted successfully with RMSE: {lstm_rmse}")
-        except Exception as e:
-            print(f"Error fitting LSTM model: {e}")
-
-    def prepare_lstm_data(self):
-        series = self.df['close'].values
-        X, y = [], []
-        window_size = 60
-        if len(series) <= window_size:
-            return np.array([]), np.array([])
-
-        for i in range(window_size, len(series)):
-            X.append(series[i - window_size:i])
-            y.append(series[i])
-        X = np.array(X).reshape(-1, window_size, 1)
-        y = np.array(y).reshape(-1, 1)
-        return torch.tensor(X).float(), torch.tensor(y).float()
+            print(f"Error generating signal from ARIMA model: {e}")
+            return 'HOLD'
 
     def calculate_arima_rmse(self):
-        predictions = self.arima_result.predict(start=self.arima_result.k_diff, end=len(self.df) - 1, dynamic=False)
-        actuals = self.df['close'][self.arima_result.k_diff:]
-        rmse = np.sqrt(((actuals - predictions) ** 2).mean())
-        return round(rmse, 4)
-
-    def calculate_lstm_rmse(self):
-        X, y = self.prepare_lstm_data()
-        if len(X) == 0:
+        if self.arima_result is None:
             return None
-        with torch.no_grad():
-            predictions = self.lstm_model(X)
-        rmse = torch.sqrt(torch.mean((predictions - y) ** 2)).item()
-        return round(rmse, 4)
+        d = self.arima_result.model_orders.get('d', 0)
+        start = d
+        end = len(self.df) - 1
+        predictions = self.arima_result.predict(start=start, end=end, dynamic=False)
+        actuals = self.df['close'][start:]
+        rmse = np.sqrt(((actuals - predictions) ** 2).mean())
+        return float(round(rmse, 4))  # Convert to standard float
 
-    def insert_scorecard_data(self, strategy_name, signal, roi, sharpe_ratio, volatility_score):
-        connection = create_db_connection()
-        query = text("""
-            INSERT INTO scorecard (`timestamp`, strategy_name, `signal`, roi, sharpe_ratio, volatility_score)
-            VALUES (:timestamp, :strategy_name, :signal, :roi, :sharpe_ratio, :volatility_score)
-        """)
-        try:
-            params = {
-                'timestamp': datetime.now(),
-                'strategy_name': strategy_name,
-                'signal': signal,
-                'roi': roi,
-                'sharpe_ratio': sharpe_ratio,
-                'volatility_score': volatility_score
-            }
-            print(query)
-            print(params)
-            print({k: type(v) for k, v in params.items()})
+    def calculate_performance_metrics(self):
+        roi = self.calculate_roi()
+        sharpe_ratio = self.calculate_sharpe_ratio()
+        volatility_score = self.calculate_volatility_score()
+        # Return None for metrics not used in this strategy
+        return roi, sharpe_ratio, volatility_score, None, None, None
 
-            result = connection.execute(query, params)
-            connection.commit()  # Commit the transaction
+    def calculate_roi(self):
+        initial_price = self.df['close'].iloc[0]
+        final_price = self.df['close'].iloc[-1]
+        roi = (final_price - initial_price) / initial_price
+        return round(roi, 4)
 
-            print(f"Inserted {result.rowcount} rows.")
-        except Exception as e:
-            print(f"Error inserting scorecard data: {e}")
-            connection.rollback()  # Roll back in case of error
-        finally:
-            close_db_connection(connection)
+    def calculate_sharpe_ratio(self):
+        risk_free_rate = 0.01  # 1% annual risk-free return
+        returns = self.df['returns'].dropna()
+        excess_returns = returns - (risk_free_rate / 252)  # Daily adjustment
+        if returns.std() == 0:
+            return 0.0  # Avoid division by zero
+        sharpe_ratio = excess_returns.mean() / returns.std() * np.sqrt(252)
+        return round(sharpe_ratio, 4)
 
+    def calculate_volatility_score(self):
+        volatility = self.df['returns'].rolling(window=20).std().mean() * np.sqrt(252)
+        return round(volatility, 4)
+
+    def insert_scorecard_data(self, **kwargs):
+        # Implement this method if needed
+        pass
+
+if __name__ == "__main__":
+    # For testing purposes
+    df = fetch_historical_data()
+    if df.empty:
+        print("No data fetched from the database.")
+    else:
+        time_series = TimeSeriesAnalysis(df)
+        time_series.fit_arima()
+        signal = time_series.get_signal()
+        roi, sharpe_ratio, volatility_score, _, _, _ = time_series.calculate_performance_metrics()
+        arima_rmse = time_series.calculate_arima_rmse()
+        print(f"Generated signal: {signal}")
+        print(f"ROI: {roi}, Sharpe Ratio: {sharpe_ratio}, Volatility Score: {volatility_score}")
+        print(f"ARIMA RMSE: {arima_rmse}")

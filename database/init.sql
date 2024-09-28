@@ -20,16 +20,21 @@ CREATE TABLE `scorecard` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     timestamp DATETIME NOT NULL,
     strategy_name VARCHAR(100) NOT NULL,
-    `signal` VARCHAR(10),  -- Escaping 'signal' to avoid conflict
+    final_decision VARCHAR(10),  -- Renamed from 'signal' to 'final_decision'
+    mean_reversion_signal VARCHAR(10),
+    time_series_signal VARCHAR(10),
     roi DECIMAL(10, 4),
     sharpe_ratio DECIMAL(10, 4),
-    win_loss_ratio DECIMAL(10, 4),
+    volatility_score DECIMAL(10, 4),
     rsi DECIMAL(5, 2),
     moving_average_cross VARCHAR(10),
-    volatility_score DECIMAL(10, 4),
-    lstm_rmse DECIMAL(10, 4),
     arima_rmse DECIMAL(10, 4),
+    weight_mean_reversion DECIMAL(10, 4),
+    weight_time_series DECIMAL(10, 4),
+    win_loss_ratio DECIMAL(10, 4),
+    lstm_rmse DECIMAL(10, 4),
     garch_volatility DECIMAL(10, 4),
     macd_signal VARCHAR(10),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
