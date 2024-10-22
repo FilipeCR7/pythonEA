@@ -19,7 +19,7 @@ def create_db_connection():
 def close_db_connection(connection):
     connection.close()
 
-def fetch_historical_data():
+def fetch_historical_data(): # test
     connection = create_db_connection()
     try:
         # Adjusted the SELECT statement to use aliases matching your table schema
