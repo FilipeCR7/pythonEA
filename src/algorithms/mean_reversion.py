@@ -1,121 +1,115 @@
-# src/algorithms/mean_reversion.py
-
+import backtrader as bt
 import pandas as pd
 import numpy as np
-from sqlalchemy import text
-from src.data.db_connection import fetch_historical_data
-import torch  # If used elsewhere in your code
-import torch.nn as nn  # If used elsewhere in your code
 
-class MeanReversionStrategy:
-    def __init__(self, df, window=20, std_dev_multiplier=2):
-        self.df = df.copy()
-        self.window = window
-        self.std_dev_multiplier = std_dev_multiplier
+class MeanReversionStrategy(bt.Strategy):
+    params = (
+        ('window', 20),
+        ('std_dev_multiplier', 2),
+        ('short_window', 20),
+        ('long_window', 50),
+    )
 
-        # Ensure 'close' column is numeric
-        self.df['close'] = pd.to_numeric(self.df['close'], errors='coerce')
-        self.df.dropna(subset=['close'], inplace=True)
+    def __init__(self):
+        self.dataclose = self.datas[0].close
 
-        # Ensure 'timestamp' column exists and is datetime
-        if 'timestamp' in self.df.columns:
-            self.df['timestamp'] = pd.to_datetime(self.df['timestamp'], errors='coerce')
-            self.df.dropna(subset=['timestamp'], inplace=True)
-            self.df.set_index('timestamp', inplace=True)
-        elif 'date' in self.df.columns:
-            self.df['timestamp'] = pd.to_datetime(self.df['date'], errors='coerce')
-            self.df.dropna(subset=['timestamp'], inplace=True)
-            self.df.set_index('timestamp', inplace=True)
-        elif isinstance(self.df.index, pd.DatetimeIndex):
-            self.df.index.name = 'timestamp'
+        self.sma = bt.indicators.SimpleMovingAverage(self.dataclose, period=self.params.window)
+        self.std_dev = bt.indicators.StandardDeviation(self.dataclose, period=self.params.window)
+        self.lower_bound = self.sma - (self.params.std_dev_multiplier * self.std_dev)
+        self.upper_bound = self.sma + (self.params.std_dev_multiplier * self.std_dev)
+
+        self.rsi = bt.indicators.RelativeStrengthIndex(self.dataclose, period=14)
+
+        self.ma_short = bt.indicators.SimpleMovingAverage(self.dataclose, period=self.params.short_window)
+        self.ma_long = bt.indicators.SimpleMovingAverage(self.dataclose, period=self.params.long_window)
+
+        self.order = None
+        self.returns = []
+        self.wins = 0
+        self.losses = 0
+
+    def next(self):
+        if self.order:
+            return
+
+        current_price = self.dataclose[0]
+        lower_bound = self.lower_bound[0]
+        upper_bound = self.upper_bound[0]
+
+        if not self.position:
+            if current_price <= lower_bound:
+                self.order = self.buy()
+            elif current_price >= upper_bound:
+                self.order = self.sell()
         else:
-            print("Error: 'timestamp' column not found in DataFrame, and index is not datetime.")
-            raise ValueError("Timestamp data is required for mean reversion analysis.")
-
-        # Remove duplicate indices
-        self.df = self.df[~self.df.index.duplicated(keep='last')]
-
-        # Sort the DataFrame by index
-        self.df.sort_index(inplace=True)
-
-    def calculate_indicators(self):
-        self.df[f'sma_{self.window}'] = self.df['close'].rolling(window=self.window).mean()
-        self.df['std_dev'] = self.df['close'].rolling(window=self.window).std()
-        self.df['lower_bound'] = self.df[f'sma_{self.window}'] - (self.std_dev_multiplier * self.df['std_dev'])
-        self.df['upper_bound'] = self.df[f'sma_{self.window}'] + (self.std_dev_multiplier * self.df['std_dev'])
-        self.current_price = self.df['close'].iloc[-1]
-        self.lower_bound = self.df['lower_bound'].iloc[-1]
-        self.upper_bound = self.df['upper_bound'].iloc[-1]
-
-    def get_signal(self):
-        self.calculate_indicators()
-        if self.current_price <= self.lower_bound:
-            return 'BUY'
-        elif self.current_price >= self.upper_bound:
-            return 'SELL'
-        else:
-            return 'HOLD'
+            if self.position.size > 0 and current_price >= self.sma[0]:
+                self.order = self.close()
+            elif self.position.size < 0 and current_price <= self.sma[0]:
+                self.order = self.close()
 
     def calculate_performance_metrics(self):
-        roi = self.calculate_roi()
-        sharpe_ratio = self.calculate_sharpe_ratio()
-        volatility_score = self.calculate_volatility_score()
-        rsi_value = self.calculate_rsi()
-        ma_cross_signal = self.calculate_moving_average_cross()
-        win_loss_ratio_value = None  # Implement if you have trade data
-        return roi, sharpe_ratio, volatility_score, rsi_value, ma_cross_signal, win_loss_ratio_value
+        roi = (self.broker.get_value() / self.broker.startingcash) - 1
 
-    def calculate_roi(self):
-        initial_price = self.df['close'].iloc[0]
-        final_price = self.df['close'].iloc[-1]
-        roi = (final_price - initial_price) / initial_price
-        return round(roi, 4)
-
-    def calculate_sharpe_ratio(self):
-        risk_free_rate = 0.01  # 1% annual risk-free return
-        returns = self.df['close'].pct_change().dropna()
-        excess_returns = returns - (risk_free_rate / 252)
-        if returns.std() == 0:
-            return 0.0  # Avoid division by zero
-        sharpe_ratio = excess_returns.mean() / returns.std() * np.sqrt(252)
-        return round(sharpe_ratio, 4)
-
-    def calculate_volatility_score(self):
-        volatility = self.df['close'].pct_change().rolling(window=20).std().mean() * np.sqrt(252)
-        return round(volatility, 4)
-
-    def calculate_rsi(self, periods=14):
-        delta = self.df['close'].diff()
-        up = delta.clip(lower=0)
-        down = -1 * delta.clip(upper=0)
-        ema_up = up.ewm(com=periods - 1, adjust=False).mean()
-        ema_down = down.ewm(com=periods - 1, adjust=False).mean()
-        rs = ema_up / ema_down
-        rsi = 100 - (100 / (1 + rs))
-        return round(rsi.iloc[-1], 2)
-
-    def calculate_moving_average_cross(self, short_window=20, long_window=50):
-        self.df['ma_short'] = self.df['close'].rolling(window=short_window).mean()
-        self.df['ma_long'] = self.df['close'].rolling(window=long_window).mean()
-        if self.df['ma_short'].iloc[-1] > self.df['ma_long'].iloc[-1]:
-            return 'BUY'
-        elif self.df['ma_short'].iloc[-1] < self.df['ma_long'].iloc[-1]:
-            return 'SELL'
+        if len(self.returns) > 1:
+            returns = np.array(self.returns)
+            risk_free_rate = 0.01 / 252
+            excess_returns = returns - risk_free_rate
+            mean_excess_return = np.mean(excess_returns)
+            std_excess_return = np.std(excess_returns)
+            sharpe_ratio = (mean_excess_return / std_excess_return) * np.sqrt(252) if std_excess_return != 0 else 0.0
         else:
-            return 'HOLD'
+            sharpe_ratio = 0.0
 
-    def insert_scorecard_data(self, **kwargs):
-        # Implement this method if needed
-        pass
+        daily_returns = pd.Series(self.dataclose.get(size=len(self.dataclose))).pct_change().dropna()
+        volatility_score = daily_returns.rolling(window=20).std().mean() * np.sqrt(252)
 
-if __name__ == "__main__":
-    df = fetch_historical_data()
-    if df.empty:
-        print("No data fetched from the database.")
-    else:
-        strategy = MeanReversionStrategy(df)
-        signal = strategy.get_signal()
-        roi, sharpe_ratio, volatility_score, rsi_value, ma_cross_signal, win_loss_ratio_value = strategy.calculate_performance_metrics()
-        print(f"Generated signal: {signal}")
-        print(f"ROI: {roi}, Sharpe Ratio: {sharpe_ratio}, Volatility Score: {volatility_score}")
-        print(f"RSI: {rsi_value}, Moving Average Cross Signal: {ma_cross_signal}")
+        rsi_value = self.rsi[0]
+
+        if self.ma_short[0] > self.ma_long[0]:
+            ma_cross_signal = 'BUY'
+        elif self.ma_short[0] < self.ma_long[0]:
+            ma_cross_signal = 'SELL'
+        else:
+            ma_cross_signal = 'HOLD'
+
+        total_trades = self.wins + self.losses
+        win_loss_ratio = self.wins / total_trades if total_trades > 0 else None
+
+        return {
+            'roi': round(roi, 4),
+            'sharpe_ratio': round(sharpe_ratio, 4),
+            'volatility_score': round(volatility_score, 4),
+            'rsi_value': round(rsi_value, 2),
+            'ma_cross_signal': ma_cross_signal,
+            'win_loss_ratio': win_loss_ratio,
+        }
+
+    def notify_order(self, order):
+        if order.status in [order.Submitted, order.Accepted]:
+            return
+
+        if order.status in [order.Completed]:
+            self.bar_executed = len(self)
+        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
+            pass
+
+        self.order = None
+
+    def notify_trade(self, trade):
+        if not trade.isclosed:
+            return
+
+        profit = trade.pnl
+        self.returns.append(profit)
+        if profit > 0:
+            self.wins += 1
+        else:
+            self.losses += 1
+
+    def stop(self):
+        metrics = self.calculate_performance_metrics()
+        print(f'ROI: {metrics["roi"]}, Sharpe Ratio: {metrics["sharpe_ratio"]}, '
+              f'Volatility Score: {metrics["volatility_score"]}, RSI: {metrics["rsi_value"]}, '
+              f'MA Cross Signal: {metrics["ma_cross_signal"]}, '
+              f'Win/Loss Ratio: {metrics["win_loss_ratio"]}')
+
