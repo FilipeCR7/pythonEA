@@ -1,4 +1,6 @@
-from src.backtesting import backtest as bt
+# src/algorithms/combined_test.py
+
+import backtrader as bt
 import numpy as np
 import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA

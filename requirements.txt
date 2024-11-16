@@ -47,3 +47,4 @@ tqdm==4.66.2
 typing_extensions==4.9.0
 tzdata==2023.3
 urllib3==2.1.0
+backtrader==1.9.76.123
