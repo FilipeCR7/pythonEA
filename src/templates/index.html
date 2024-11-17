@@ -1,0 +1,129 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Backtesting Platform</title>
+    <!-- Include Vue.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!-- Include Axios via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Include Plotly.js via CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>Interactive Backtesting Platform</h1>
+
+        <!-- Parameters Form -->
+        <div>
+            <label>Mean Reversion Window:</label>
+            <input v-model.number="meanRevWindow" type="number" min="1" />
+
+            <label>Std Dev Multiplier:</label>
+            <input v-model.number="stdDevMultiplier" type="number" step="0.1" />
+
+            <label>ARIMA Order (p, d, q):</label>
+            <input v-model.number="arimaP" type="number" min="0" />
+            <input v-model.number="arimaD" type="number" min="0" />
+            <input v-model.number="arimaQ" type="number" min="0" />
+
+            <button @click="runBacktest">Run Backtest</button>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div v-if="loading">Running backtest...</div>
+        <div v-if="error">{{ error }}</div>
+
+        <!-- Results -->
+        <div v-if="results">
+            <h2>Performance Metrics</h2>
+            <p>Starting Portfolio Value: $100,000</p>
+            <p>Final Portfolio Value: ${{ finalPortfolioValue.toFixed(2) }}</p>
+            <p>Total Return: ${{ totalReturn.toFixed(2) }}</p>
+            <p>Total Trades: {{ trades.total.closed }}</p>
+            <p>Winning Trades: {{ trades.won.total }}</p>
+            <p>Losing Trades: {{ trades.lost.total }}</p>
+
+            <!-- Equity Curve Chart -->
+            <div id="equity-chart"></div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                meanRevWindow: 20,
+                stdDevMultiplier: 2.0,
+                arimaP: 5,
+                arimaD: 1,
+                arimaQ: 0,
+                results: null,
+                loading: false,
+                error: null
+            },
+            computed: {
+                finalPortfolioValue() {
+                    return 100000 + this.results.total_return;
+                },
+                totalReturn() {
+                    return this.results.total_return;
+                },
+                trades() {
+                    return this.results.trades;
+                }
+            },
+            methods: {
+                runBacktest() {
+                    this.loading = true;
+                    this.error = null;
+                    this.results = null;
+
+                    const params = {
+                        mean_rev_window: this.meanRevWindow,
+                        std_dev_multiplier: this.stdDevMultiplier,
+                        arima_order: [this.arimaP, this.arimaD, this.arimaQ]
+                    };
+
+                    axios.post('/run_backtest', params)
+                        .then(response => {
+                            this.results = response.data;
+                            if (this.results.error) {
+                                this.error = this.results.error;
+                            } else {
+                                this.plotEquityCurve();
+                            }
+                        })
+                        .catch(error => {
+                            this.error = 'Error running backtest.';
+                            console.error(error);
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                        });
+                },
+                plotEquityCurve() {
+                    const equityCurve = this.results.equity_curve;
+                    const data = [{
+                        x: equityCurve.map(point => point.datetime),
+                        y: equityCurve.map(point => point.equity),
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Equity Curve'
+                    }];
+
+                    const layout = {
+                        title: 'Equity Curve',
+                        xaxis: { title: 'Date' },
+                        yaxis: { title: 'Equity ($)' }
+                    };
+
+                    Plotly.newPlot('equity-chart', data, layout);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
