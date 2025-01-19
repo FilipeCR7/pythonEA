@@ -13,8 +13,6 @@ import pandas as pd
 from src.algorithms.combined_test import CombinedStrategy
 from src.data.db_connection import fetch_historical_data
 
-# Rest of your backtest.py code...
-
 def run_backtest(strategy, cash=100000.0, commission=0.0, printlog=False):
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(cash)
@@ -26,22 +24,24 @@ def run_backtest(strategy, cash=100000.0, commission=0.0, printlog=False):
         print("No data fetched from the database.")
         return
 
+    print("Columns in DataFrame:", df.columns.tolist())
+
     # Prepare DataFrame for Backtrader
     df['datetime'] = pd.to_datetime(df['timestamp'])
     df.set_index('datetime', inplace=True)
     df.sort_index(inplace=True)
-    df = df[['open_price', 'high_price', 'low_price', 'close_price', 'volume']]
-    df.rename(columns={
-        'open_price': 'open',
-        'high_price': 'high',
-        'low_price': 'low',
-        'close_price': 'close',
-    }, inplace=True)
+    df = df[['open', 'high', 'low', 'close', 'volume']]  # Correct column names
+
     df['openinterest'] = 0  # Required column for Backtrader
 
     # Convert to numeric and drop NaNs
-    df = df.apply(pd.to_numeric, errors='coerce')
+    numeric_columns = ['open', 'high', 'low', 'close', 'volume']
+    df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
     df.dropna(inplace=True)
+
+    # Verify the data
+    print("DataFrame columns after preparation:", df.columns.tolist())
+    print(df.head())
 
     # Create Data Feed
     data = bt.feeds.PandasData(dataname=df)

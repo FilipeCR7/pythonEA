@@ -51,6 +51,13 @@ def fetch_historical_data(): # test
         ORDER BY `timestamp` ASC
         """
         df = pd.read_sql(query, connection)
+
+        # Add print statements here to output sample data
+        print("Sample data from historical_data:")
+        print(df.head(10))  # Print the first 10 rows
+        print("Data types of each column:")
+        print(df.dtypes)    # Print the data types of the columns
+
         close_db_connection(connection)
         return df
     except SQLAlchemyError as e:

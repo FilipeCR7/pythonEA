@@ -40,11 +40,11 @@
         <div v-if="results">
             <h2>Performance Metrics</h2>
             <p>Starting Portfolio Value: $100,000</p>
-            <p>Final Portfolio Value: ${{ finalPortfolioValue.toFixed(2) }}</p>
-            <p>Total Return: ${{ totalReturn.toFixed(2) }}</p>
-            <p>Total Trades: {{ trades.total.closed }}</p>
-            <p>Winning Trades: {{ trades.won.total }}</p>
-            <p>Losing Trades: {{ trades.lost.total }}</p>
+            <p>Final Portfolio Value: $[[ finalPortfolioValue.toFixed(2) ]]</p>
+            <p>Total Return: $[[ totalReturn.toFixed(2) ]]</p>
+            <p>Total Trades: [[ trades.total.closed ]]</p>
+            <p>Winning Trades: [[ trades.won.total ]]</p>
+            <p>Losing Trades: [[ trades.lost.total ]]</p>
 
             <!-- Equity Curve Chart -->
             <div id="equity-chart"></div>

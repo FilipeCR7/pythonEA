@@ -2,6 +2,12 @@ import requests
 from sqlalchemy import create_engine
 import pandas as pd
 from datetime import datetime, timedelta
+import oandapyV20
+from oandapyV20 import API
+import oandapyV20.endpoints.orders as orders
+import oandapyV20.endpoints.accounts as accounts
+import oandapyV20.endpoints.positions as positions
+import oandapyV20.endpoints.pricing as pricing
 
 
 class OandaAPI:
@@ -10,21 +16,69 @@ class OandaAPI:
         Initialize the Oanda API client with the account ID and necessary headers.
         """
         self.account_id = account_id
+        self.access_token = 'bafecd1d1dd3075320ca677069c53a04-1876cffb0dfc669fcd5ce6a54794d1ad'  # Your OANDA API key
         self.api_base_url = 'https://api-fxpractice.oanda.com/v3'
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer bafecd1d1dd3075320ca677069c53a04-1876cffb0dfc669fcd5ce6a54794d1ad'
-            # Your OANDA API key with 'Bearer'
+            'Authorization': f'Bearer {self.access_token}'
         }
+        self.api = API(access_token=self.access_token, environment='practice')  # Initialize self.api
         # MySQL Database Connection
         self.database_uri = 'mysql+mysqlconnector://root:root@localhost/python_ea'
         self.engine = create_engine(self.database_uri)
+
+    def get_account_summary(self):
+        """
+        Retrieve account balance and margin information.
+        """
+        r = accounts.AccountSummary(accountID=self.account_id)
+        response = self.api.request(r)
+        return response
+
+    def get_current_price(self, instrument):
+        """
+        Fetch the current price for a given instrument.
+        """
+        params = {"instruments": instrument}
+        r = pricing.PricingInfo(accountID=self.account_id, params=params)
+        response = self.api.request(r)
+        return response
+
+    def place_market_order(self, instrument, units, stop_loss=None, take_profit=None):
+        """
+        Place a market order with optional stop loss and take profit.
+        """
+        data = {
+            "order": {
+                "units": str(units),
+                "instrument": instrument,
+                "timeInForce": "FOK",
+                "type": "MARKET",
+                "positionFill": "DEFAULT",
+            }
+        }
+        if stop_loss:
+            data['order']['stopLossOnFill'] = {"price": str(stop_loss)}
+        if take_profit:
+            data['order']['takeProfitOnFill'] = {"price": str(take_profit)}
+        r = orders.OrderCreate(accountID=self.account_id, data=data)
+        response = self.api.request(r)
+        return response
+
+    def close_position(self, instrument):
+        """
+        Close all open positions for a given instrument.
+        """
+        data = {}
+        r = positions.PositionClose(accountID=self.account_id, instrument=instrument, data=data)
+        response = self.api.request(r)
+        return response
 
     def get_historical_data(self, instrument="USD_CAD", start_date="2023-01-01T00:00:00Z",
                             end_date="2023-01-01T23:59:00Z"):
         """
         Fetch historical candlestick data for the full day (minute-level granularity).
-        It fetches data in hourly batches to ensure all data is collected.
+        It fetches data hour by hour to ensure all data is collected.
         """
         url = f"{self.api_base_url}/instruments/{instrument}/candles"
         fetched_data = []
@@ -95,4 +149,3 @@ if __name__ == "__main__":
     historical_data = oanda_api.get_historical_data(start_date="2023-01-09T00:00:00Z", end_date="2023-01-09T23:59:00Z")
     # Insert the data into the MySQL database
     oanda_api.insert_historical_data_into_db(historical_data)
-

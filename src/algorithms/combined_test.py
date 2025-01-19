@@ -12,12 +12,11 @@ class CombinedStrategy(bt.Strategy):
         ('std_dev_multiplier', 2),
         ('arima_order', (5, 1, 0)),
         ('arima_window_size', 100),
-        ('short_window', 20),
-        ('long_window', 50),
         ('printlog', False),
     )
 
     def __init__(self):
+        # Existing initialization code...
         self.dataclose = self.datas[0].close
 
         # Mean Reversion Indicators
@@ -26,24 +25,14 @@ class CombinedStrategy(bt.Strategy):
         self.lower_band = self.sma - (self.params.std_dev_multiplier * self.std_dev)
         self.upper_band = self.sma + (self.params.std_dev_multiplier * self.std_dev)
 
-        # RSI Indicator
-        self.rsi = bt.indicators.RelativeStrengthIndex(self.dataclose, period=14)
-        # Moving Averages for MA Cross Signal
-        self.ma_short = bt.indicators.SimpleMovingAverage(self.dataclose, period=self.params.short_window)
-        self.ma_long = bt.indicators.SimpleMovingAverage(self.dataclose, period=self.params.long_window)
-
         # Time Series Analysis
         self.arima_result = None
 
         self.order = None
-        self.returns = []
-        self.wins = 0
-        self.losses = 0
-
-        # Suppress convergence warnings
-        warnings.filterwarnings("ignore", message=".*Maximum Likelihood optimization failed to converge.*")
+        self.bar_executed = 0  # To track when the last order was executed
 
     def next(self):
+        # Check for pending orders
         if self.order:
             return
 
@@ -79,41 +68,53 @@ class CombinedStrategy(bt.Strategy):
         # Combine Signals
         combined_signal = mean_rev_signal + time_series_signal
 
+        # Position Sizing
+        account_value = self.broker.getvalue()
+        risk_per_trade = 0.01  # Risk 1% per trade
+        stop_loss_pips = 50  # Adjust as needed
+        pip_value = 0.0001  # Adjust based on the currency pair
+        stake = int((account_value * risk_per_trade) / (stop_loss_pips * pip_value))
+        stake = max(stake, 1)  # Ensure at least a stake of 1
+
         if not self.position:
             if combined_signal > 0:
-                self.order = self.buy()
+                self.order = self.buy(size=stake, exectype=bt.Order.Market)
+                self.bar_executed = len(self)
                 if self.params.printlog:
-                    print(f'BUY ORDER PLACED at price {current_price:.5f}')
+                    print(f'BUY ORDER PLACED at price {current_price:.5f}, size {stake}')
             elif combined_signal < 0:
-                self.order = self.sell()
+                self.order = self.sell(size=stake, exectype=bt.Order.Market)
+                self.bar_executed = len(self)
                 if self.params.printlog:
-                    print(f'SELL ORDER PLACED at price {current_price:.5f}')
+                    print(f'SELL ORDER PLACED at price {current_price:.5f}, size {stake}')
         else:
-            if self.position.size > 0 and combined_signal <= 0:
-                self.order = self.close()
-                if self.params.printlog:
-                    print(f'CLOSE LONG POSITION at price {current_price:.5f}')
-            elif self.position.size < 0 and combined_signal >= 0:
-                self.order = self.close()
-                if self.params.printlog:
-                    print(f'CLOSE SHORT POSITION at price {current_price:.5f}')
+            # Wait for at least one bar after entry before exiting
+            if len(self) >= (self.bar_executed + 1):
+                if self.position.size > 0 and combined_signal <= 0:
+                    self.order = self.close()
+                    if self.params.printlog:
+                        print(f'CLOSE LONG POSITION at price {current_price:.5f}')
+                elif self.position.size < 0 and combined_signal >= 0:
+                    self.order = self.close()
+                    if self.params.printlog:
+                        print(f'CLOSE SHORT POSITION at price {current_price:.5f}')
 
     def notify_order(self, order):
-        if order.status in [order.Submitted, order.Accepted]:
-            return  # Order is active
-
         if order.status in [order.Completed]:
-            if self.params.printlog:
-                if order.isbuy():
-                    print(f'BUY EXECUTED, Price: {order.executed.price:.5f}')
-                elif order.issell():
-                    print(f'SELL EXECUTED, Price: {order.executed.price:.5f}')
-            self.bar_executed = len(self)
+            if order.isbuy():
+                if self.params.printlog:
+                    print(f'BUY EXECUTED, Price: {order.executed.price:.5f}, Size: {order.executed.size}')
+            elif order.issell():
+                if self.params.printlog:
+                    print(f'SELL EXECUTED, Price: {order.executed.price:.5f}, Size: {order.executed.size}')
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             if self.params.printlog:
                 print('Order Canceled/Margin/Rejected')
 
-        self.order = None  # Reset order
+        self.order = None  # Reset orders
+
+    # ... rest of your strategy code ...
+
 
     def notify_trade(self, trade):
         if not trade.isclosed:
