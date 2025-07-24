@@ -1,0 +1,161 @@
+{
+ "summary": {
+  "text": "Schema conversion: OK (77% of 26 columns mapped cleanly).\nData conversion: EXCELLENT (all 429104 rows written to Spanner).\n",
+  "rating": "EXCELLENT",
+  "dbName": "mysqldump_2025-01-19_ee72-5dcd"
+ },
+ "isSharded": false,
+ "ignoredStatements": null,
+ "conversionMetadata": [
+  {
+   "conversionType": "Schema",
+   "duration": 21504473108
+  },
+  {
+   "conversionType": "Data",
+   "duration": 28207269763
+  }
+ ],
+ "migrationType": "SCHEMA_AND_DATA",
+ "statementStats": {
+  "driverName": "mysqldump",
+  "statementStats": [
+   {
+    "statement": "LockTablesStmt",
+    "schema": 0,
+    "data": 0,
+    "skip": 2,
+    "error": 0,
+    "totalCount": 0
+   },
+   {
+    "statement": "AlterTableStmt",
+    "schema": 0,
+    "data": 0,
+    "skip": 4,
+    "error": 0,
+    "totalCount": 0
+   },
+   {
+    "statement": "InsertStmt",
+    "schema": 0,
+    "data": 115,
+    "skip": 0,
+    "error": 0,
+    "totalCount": 0
+   },
+   {
+    "statement": "UnlockTablesStmt",
+    "schema": 0,
+    "data": 0,
+    "skip": 2,
+    "error": 0,
+    "totalCount": 0
+   },
+   {
+    "statement": "DropTableStmt",
+    "schema": 0,
+    "data": 0,
+    "skip": 2,
+    "error": 0,
+    "totalCount": 0
+   },
+   {
+    "statement": "CreateTableStmt",
+    "schema": 2,
+    "data": 0,
+    "skip": 0,
+    "error": 0,
+    "totalCount": 0
+   }
+  ]
+ },
+ "nameChanges": null,
+ "tableReports": [
+  {
+   "srcTableName": "historical_data",
+   "spTableName": "historical_data",
+   "schemaReport": {
+    "rating": "POOR",
+    "pkMissing": false,
+    "issues": 3,
+    "warnings": 3,
+    "totalColumns": 7
+   },
+   "dataReport": {
+    "rating": "NONE",
+    "badRows": 0,
+    "totalRows": 0,
+    "dryRun": false
+   },
+   "issues": [
+    {
+     "issueType": "Warnings",
+     "issueList": [
+      {
+       "category": "STORAGE_WARNING",
+       "description": "Table 'historical_data': Some columns will consume more storage in Spanner e.g. for column 'id', source DB type int(11) is mapped to Spanner data type int64"
+      },
+      {
+       "category": "AUTO_INCREMENT_ATTRIBUTE_USES",
+       "description": "Column 'id' is an autoincrement column in table 'historical_data'. Spanner does not support auto_increment attribute"
+      },
+      {
+       "category": "TIMESTAMP_WARNING",
+       "description": "Some columns have source DB type 'datetime' which is mapped to Spanner type timestamp in table 'historical_data' e.g. column 'timestamp'. Spanner timestamp is closer to MySQL timestamp"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "srcTableName": "scorecard",
+   "spTableName": "scorecard",
+   "schemaReport": {
+    "rating": "OK",
+    "pkMissing": false,
+    "issues": 4,
+    "warnings": 3,
+    "totalColumns": 19
+   },
+   "dataReport": {
+    "rating": "NONE",
+    "badRows": 0,
+    "totalRows": 0,
+    "dryRun": false
+   },
+   "issues": [
+    {
+     "issueType": "Warnings",
+     "issueList": [
+      {
+       "category": "STORAGE_WARNING",
+       "description": "Table 'scorecard': Some columns will consume more storage in Spanner e.g. for column 'id', source DB type int(11) is mapped to Spanner data type int64"
+      },
+      {
+       "category": "AUTO_INCREMENT_ATTRIBUTE_USES",
+       "description": "Column 'id' is an autoincrement column in table 'scorecard'. Spanner does not support auto_increment attribute"
+      },
+      {
+       "category": "TIMESTAMP_WARNING",
+       "description": "Some columns have source DB type 'datetime' which is mapped to Spanner type timestamp in table 'scorecard' e.g. column 'timestamp'. Spanner timestamp is closer to MySQL timestamp"
+      }
+     ]
+    },
+    {
+     "issueType": "Note",
+     "issueList": [
+      {
+       "category": "MISSING_DEFAULT_VALUE_CONSTRAINTS",
+       "description": "Some columns have default values which Spanner migration tool does not migrate. Please add the default constraints manually after the migration is complete for table 'scorecard' e.g. column 'created_at'"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "unexpectedConditions": {
+  "Reparsed": 0,
+  "unexpectedConditions": null
+ }
+}

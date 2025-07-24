@@ -17,9 +17,39 @@ from src.data.db_connection import fetch_historical_data
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+@app.route('/get_price_data', methods=['GET'])
+def get_price_data():
+    # Fetch data
+    df = fetch_historical_data()
+    if df.empty:
+        return jsonify({'error': 'No data available.'})
+
+    # Print the columns of the DataFrame for debugging
+    print("DataFrame columns:", df.columns.tolist())
+
+    # Prepare data
+    df['datetime'] = pd.to_datetime(df['timestamp'])
+    df.sort_values('datetime', inplace=True)
+    df = df[['datetime', 'open', 'high', 'low', 'close']]
+
+    # Rename columns to match expected names in frontend
+    df.rename(columns={
+        'open': 'open_price',
+        'high': 'high_price',
+        'low': 'low_price',
+        'close': 'close_price'
+    }, inplace=True)
+
+    df['datetime'] = df['datetime'].astype(str)
+
+    # Convert DataFrame to dictionary
+    price_data = df.to_dict(orient='records')
+
+    # Return JSON response
+    return jsonify({'price_data': price_data})
 
 @app.route('/run_backtest', methods=['POST'])
 def run_backtest():

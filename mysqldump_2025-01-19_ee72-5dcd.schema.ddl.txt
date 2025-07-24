@@ -1,0 +1,33 @@
+CREATE TABLE `historical_data` (
+	`id` INT64 NOT NULL ,
+	`timestamp` TIMESTAMP,
+	`open_price` NUMERIC,
+	`high_price` NUMERIC,
+	`low_price` NUMERIC,
+	`close_price` NUMERIC,
+	`volume` INT64,
+) PRIMARY KEY (`id`);
+
+CREATE INDEX `idx_timestamp` ON `historical_data` (`timestamp`);
+
+CREATE TABLE `scorecard` (
+	`id` INT64 NOT NULL ,
+	`timestamp` TIMESTAMP NOT NULL ,
+	`strategy_name` STRING(100) NOT NULL ,
+	`final_decision` STRING(10),
+	`mean_reversion_signal` STRING(10),
+	`time_series_signal` STRING(10),
+	`roi` NUMERIC,
+	`sharpe_ratio` NUMERIC,
+	`volatility_score` NUMERIC,
+	`rsi` NUMERIC,
+	`moving_average_cross` STRING(10),
+	`arima_rmse` NUMERIC,
+	`weight_mean_reversion` NUMERIC,
+	`weight_time_series` NUMERIC,
+	`win_loss_ratio` NUMERIC,
+	`lstm_rmse` NUMERIC,
+	`garch_volatility` NUMERIC,
+	`macd_signal` STRING(10),
+	`created_at` TIMESTAMP NOT NULL ,
+) PRIMARY KEY (`id`)

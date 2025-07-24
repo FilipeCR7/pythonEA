@@ -1,0 +1,1603 @@
+{
+ "SpSchema": {
+  "t1": {
+   "Name": "historical_data",
+   "ColIds": [
+    "c2",
+    "c3",
+    "c4",
+    "c5",
+    "c6",
+    "c7",
+    "c8"
+   ],
+   "ShardIdColumn": "",
+   "ColDefs": {
+    "c2": {
+     "Name": "id",
+     "T": {
+      "Name": "INT64",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": true,
+     "Comment": "From: id int(11)",
+     "Id": "c2",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c3": {
+     "Name": "timestamp",
+     "T": {
+      "Name": "TIMESTAMP",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: timestamp datetime",
+     "Id": "c3",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c4": {
+     "Name": "open_price",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: open_price decimal(10,5)",
+     "Id": "c4",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c5": {
+     "Name": "high_price",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: high_price decimal(10,5)",
+     "Id": "c5",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c6": {
+     "Name": "low_price",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: low_price decimal(10,5)",
+     "Id": "c6",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c7": {
+     "Name": "close_price",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: close_price decimal(10,5)",
+     "Id": "c7",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c8": {
+     "Name": "volume",
+     "T": {
+      "Name": "INT64",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: volume bigint(20)",
+     "Id": "c8",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    }
+   },
+   "PrimaryKeys": [
+    {
+     "ColId": "c2",
+     "Desc": false,
+     "Order": 1
+    }
+   ],
+   "ForeignKeys": null,
+   "Indexes": [
+    {
+     "Name": "idx_timestamp",
+     "TableId": "t1",
+     "Unique": false,
+     "Keys": [
+      {
+       "ColId": "c3",
+       "Desc": false,
+       "Order": 1
+      }
+     ],
+     "Id": "i9",
+     "StoredColumnIds": null
+    }
+   ],
+   "ParentTable": {
+    "Id": "",
+    "OnDelete": ""
+   },
+   "CheckConstraints": null,
+   "Comment": "Spanner schema for source table historical_data",
+   "Id": "t1"
+  },
+  "t10": {
+   "Name": "scorecard",
+   "ColIds": [
+    "c11",
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "c17",
+    "c18",
+    "c19",
+    "c20",
+    "c21",
+    "c22",
+    "c23",
+    "c24",
+    "c25",
+    "c26",
+    "c27",
+    "c28",
+    "c29"
+   ],
+   "ShardIdColumn": "",
+   "ColDefs": {
+    "c11": {
+     "Name": "id",
+     "T": {
+      "Name": "INT64",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": true,
+     "Comment": "From: id int(11)",
+     "Id": "c11",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c12": {
+     "Name": "timestamp",
+     "T": {
+      "Name": "TIMESTAMP",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": true,
+     "Comment": "From: timestamp datetime",
+     "Id": "c12",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c13": {
+     "Name": "strategy_name",
+     "T": {
+      "Name": "STRING",
+      "Len": 100,
+      "IsArray": false
+     },
+     "NotNull": true,
+     "Comment": "From: strategy_name varchar(100)",
+     "Id": "c13",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c14": {
+     "Name": "final_decision",
+     "T": {
+      "Name": "STRING",
+      "Len": 10,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: final_decision varchar(10)",
+     "Id": "c14",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c15": {
+     "Name": "mean_reversion_signal",
+     "T": {
+      "Name": "STRING",
+      "Len": 10,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: mean_reversion_signal varchar(10)",
+     "Id": "c15",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c16": {
+     "Name": "time_series_signal",
+     "T": {
+      "Name": "STRING",
+      "Len": 10,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: time_series_signal varchar(10)",
+     "Id": "c16",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c17": {
+     "Name": "roi",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: roi decimal(10,4)",
+     "Id": "c17",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c18": {
+     "Name": "sharpe_ratio",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: sharpe_ratio decimal(10,4)",
+     "Id": "c18",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c19": {
+     "Name": "volatility_score",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: volatility_score decimal(10,4)",
+     "Id": "c19",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c20": {
+     "Name": "rsi",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: rsi decimal(5,2)",
+     "Id": "c20",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c21": {
+     "Name": "moving_average_cross",
+     "T": {
+      "Name": "STRING",
+      "Len": 10,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: moving_average_cross varchar(10)",
+     "Id": "c21",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c22": {
+     "Name": "arima_rmse",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: arima_rmse decimal(10,4)",
+     "Id": "c22",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c23": {
+     "Name": "weight_mean_reversion",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: weight_mean_reversion decimal(10,4)",
+     "Id": "c23",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c24": {
+     "Name": "weight_time_series",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: weight_time_series decimal(10,4)",
+     "Id": "c24",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c25": {
+     "Name": "win_loss_ratio",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: win_loss_ratio decimal(10,4)",
+     "Id": "c25",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c26": {
+     "Name": "lstm_rmse",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: lstm_rmse decimal(10,4)",
+     "Id": "c26",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c27": {
+     "Name": "garch_volatility",
+     "T": {
+      "Name": "NUMERIC",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: garch_volatility decimal(10,4)",
+     "Id": "c27",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c28": {
+     "Name": "macd_signal",
+     "T": {
+      "Name": "STRING",
+      "Len": 10,
+      "IsArray": false
+     },
+     "NotNull": false,
+     "Comment": "From: macd_signal varchar(10)",
+     "Id": "c28",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c29": {
+     "Name": "created_at",
+     "T": {
+      "Name": "TIMESTAMP",
+      "Len": 0,
+      "IsArray": false
+     },
+     "NotNull": true,
+     "Comment": "From: created_at timestamp",
+     "Id": "c29",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    }
+   },
+   "PrimaryKeys": [
+    {
+     "ColId": "c11",
+     "Desc": false,
+     "Order": 1
+    }
+   ],
+   "ForeignKeys": null,
+   "Indexes": null,
+   "ParentTable": {
+    "Id": "",
+    "OnDelete": ""
+   },
+   "CheckConstraints": null,
+   "Comment": "Spanner schema for source table scorecard",
+   "Id": "t10"
+  }
+ },
+ "SyntheticPKeys": {},
+ "SrcSchema": {
+  "t1": {
+   "Name": "historical_data",
+   "Schema": "",
+   "ColIds": [
+    "c2",
+    "c3",
+    "c4",
+    "c5",
+    "c6",
+    "c7",
+    "c8"
+   ],
+   "ColDefs": {
+    "c2": {
+     "Name": "id",
+     "Type": {
+      "Name": "int",
+      "Mods": [
+       11
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": true,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": true
+     },
+     "Id": "c2",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c3": {
+     "Name": "timestamp",
+     "Type": {
+      "Name": "datetime",
+      "Mods": null,
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c3",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c4": {
+     "Name": "open_price",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       5
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c4",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c5": {
+     "Name": "high_price",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       5
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c5",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c6": {
+     "Name": "low_price",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       5
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c6",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c7": {
+     "Name": "close_price",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       5
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c7",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c8": {
+     "Name": "volume",
+     "Type": {
+      "Name": "bigint",
+      "Mods": [
+       20
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c8",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    }
+   },
+   "PrimaryKeys": [
+    {
+     "ColId": "c2",
+     "Desc": false,
+     "Order": 1
+    }
+   ],
+   "ForeignKeys": null,
+   "CheckConstraints": null,
+   "Indexes": [
+    {
+     "Name": "idx_timestamp",
+     "Unique": false,
+     "Keys": [
+      {
+       "ColId": "c3",
+       "Desc": false,
+       "Order": 1
+      }
+     ],
+     "Id": "i9",
+     "StoredColumnIds": null
+    }
+   ],
+   "Id": "t1"
+  },
+  "t10": {
+   "Name": "scorecard",
+   "Schema": "",
+   "ColIds": [
+    "c11",
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "c17",
+    "c18",
+    "c19",
+    "c20",
+    "c21",
+    "c22",
+    "c23",
+    "c24",
+    "c25",
+    "c26",
+    "c27",
+    "c28",
+    "c29"
+   ],
+   "ColDefs": {
+    "c11": {
+     "Name": "id",
+     "Type": {
+      "Name": "int",
+      "Mods": [
+       11
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": true,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": true
+     },
+     "Id": "c11",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c12": {
+     "Name": "timestamp",
+     "Type": {
+      "Name": "datetime",
+      "Mods": null,
+      "ArrayBounds": null
+     },
+     "NotNull": true,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c12",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c13": {
+     "Name": "strategy_name",
+     "Type": {
+      "Name": "varchar",
+      "Mods": [
+       100
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": true,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c13",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c14": {
+     "Name": "final_decision",
+     "Type": {
+      "Name": "varchar",
+      "Mods": [
+       10
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c14",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c15": {
+     "Name": "mean_reversion_signal",
+     "Type": {
+      "Name": "varchar",
+      "Mods": [
+       10
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c15",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c16": {
+     "Name": "time_series_signal",
+     "Type": {
+      "Name": "varchar",
+      "Mods": [
+       10
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c16",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c17": {
+     "Name": "roi",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c17",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c18": {
+     "Name": "sharpe_ratio",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c18",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c19": {
+     "Name": "volatility_score",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c19",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c20": {
+     "Name": "rsi",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       5,
+       2
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c20",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c21": {
+     "Name": "moving_average_cross",
+     "Type": {
+      "Name": "varchar",
+      "Mods": [
+       10
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c21",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c22": {
+     "Name": "arima_rmse",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c22",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c23": {
+     "Name": "weight_mean_reversion",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c23",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c24": {
+     "Name": "weight_time_series",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c24",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c25": {
+     "Name": "win_loss_ratio",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c25",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c26": {
+     "Name": "lstm_rmse",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c26",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c27": {
+     "Name": "garch_volatility",
+     "Type": {
+      "Name": "decimal",
+      "Mods": [
+       10,
+       4
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c27",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c28": {
+     "Name": "macd_signal",
+     "Type": {
+      "Name": "varchar",
+      "Mods": [
+       10
+      ],
+      "ArrayBounds": null
+     },
+     "NotNull": false,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": false,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c28",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    },
+    "c29": {
+     "Name": "created_at",
+     "Type": {
+      "Name": "timestamp",
+      "Mods": null,
+      "ArrayBounds": null
+     },
+     "NotNull": true,
+     "Ignored": {
+      "Check": false,
+      "Identity": false,
+      "Default": true,
+      "Exclusion": false,
+      "ForeignKey": false,
+      "AutoIncrement": false
+     },
+     "Id": "c29",
+     "AutoGen": {
+      "Name": "",
+      "GenerationType": ""
+     },
+     "DefaultValue": {
+      "IsPresent": false,
+      "Value": {
+       "ExpressionId": "",
+       "Statement": ""
+      }
+     }
+    }
+   },
+   "PrimaryKeys": [
+    {
+     "ColId": "c11",
+     "Desc": false,
+     "Order": 1
+    }
+   ],
+   "ForeignKeys": null,
+   "CheckConstraints": null,
+   "Indexes": null,
+   "Id": "t10"
+  }
+ },
+ "SchemaIssues": {
+  "t1": {
+   "ColumnLevelIssues": {
+    "c2": [
+     14,
+     11
+    ],
+    "c3": [
+     13
+    ]
+   },
+   "TableLevelIssues": null
+  },
+  "t10": {
+   "ColumnLevelIssues": {
+    "c11": [
+     14,
+     11
+    ],
+    "c12": [
+     13
+    ],
+    "c29": [
+     0
+    ]
+   },
+   "TableLevelIssues": null
+  }
+ },
+ "Location": {},
+ "TimezoneOffset": "+00:00",
+ "SpDialect": "google_standard_sql",
+ "UniquePKey": {},
+ "Rules": [],
+ "IsSharded": false,
+ "SpRegion": "",
+ "ResourceValidation": false,
+ "UI": false,
+ "SpSequences": {},
+ "SrcSequences": {},
+ "SpProjectId": "animated-surfer-447920-g5",
+ "SpInstanceId": "infxnity-backtesing-db",
+ "Source": "mysqldump"
+}

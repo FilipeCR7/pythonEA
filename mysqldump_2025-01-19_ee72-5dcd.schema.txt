@@ -1,0 +1,40 @@
+-- Schema generated 2025-01-19 15:43:24
+--
+-- Spanner schema for source table historical_data
+--
+CREATE TABLE historical_data (
+	id INT64 NOT NULL ,  -- From: id int(11)
+	timestamp TIMESTAMP, -- From: timestamp datetime
+	open_price NUMERIC,  -- From: open_price decimal(10,5)
+	high_price NUMERIC,  -- From: high_price decimal(10,5)
+	low_price NUMERIC,   -- From: low_price decimal(10,5)
+	close_price NUMERIC, -- From: close_price decimal(10,5)
+	volume INT64,        -- From: volume bigint(20)
+) PRIMARY KEY (id);
+
+CREATE INDEX idx_timestamp ON historical_data (timestamp);
+
+--
+-- Spanner schema for source table scorecard
+--
+CREATE TABLE scorecard (
+	id INT64 NOT NULL ,                  -- From: id int(11)
+	timestamp TIMESTAMP NOT NULL ,       -- From: timestamp datetime
+	strategy_name STRING(100) NOT NULL , -- From: strategy_name varchar(100)
+	final_decision STRING(10),           -- From: final_decision varchar(10)
+	mean_reversion_signal STRING(10),    -- From: mean_reversion_signal varchar(10)
+	time_series_signal STRING(10),       -- From: time_series_signal varchar(10)
+	roi NUMERIC,                         -- From: roi decimal(10,4)
+	sharpe_ratio NUMERIC,                -- From: sharpe_ratio decimal(10,4)
+	volatility_score NUMERIC,            -- From: volatility_score decimal(10,4)
+	rsi NUMERIC,                         -- From: rsi decimal(5,2)
+	moving_average_cross STRING(10),     -- From: moving_average_cross varchar(10)
+	arima_rmse NUMERIC,                  -- From: arima_rmse decimal(10,4)
+	weight_mean_reversion NUMERIC,       -- From: weight_mean_reversion decimal(10,4)
+	weight_time_series NUMERIC,          -- From: weight_time_series decimal(10,4)
+	win_loss_ratio NUMERIC,              -- From: win_loss_ratio decimal(10,4)
+	lstm_rmse NUMERIC,                   -- From: lstm_rmse decimal(10,4)
+	garch_volatility NUMERIC,            -- From: garch_volatility decimal(10,4)
+	macd_signal STRING(10),              -- From: macd_signal varchar(10)
+	created_at TIMESTAMP NOT NULL ,      -- From: created_at timestamp
+) PRIMARY KEY (id)

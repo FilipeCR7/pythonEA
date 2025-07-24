@@ -1,0 +1,82 @@
+Generated at 2025-01-19 15:43:24 for db 
+
+----------------------------
+Summary of Conversion
+----------------------------
+Schema conversion: OK (77% of 26 columns mapped cleanly).
+Data conversion: EXCELLENT (all 429104 rows written to Spanner).
+
+----------------------------
+Time duration of Conversion
+----------------------------
+Schema conversion duration : 21.504473108s 
+Data conversion duration : 28.207269763s 
+
+The remainder of this report provides stats on the mysqldump statements
+processed, followed by a table-by-table listing of SCHEMA_AND_DATA conversion
+details. For background on the SCHEMA_AND_DATA conversion process used, and
+explanations of the terms and notes used in this report, see Spanner migration
+tool's README.
+
+----------------------------
+Statements Processed
+----------------------------
+Analysis of statements in mysqldump output, broken down by statement type.
+  schema: statements successfully processed for Spanner schema information.
+    data: statements successfully processed for data.
+    skip: statements not relevant for Spanner schema or data.
+   error: statements that could not be processed.
+  --------------------------------------
+  schema   data   skip  error  statement
+  --------------------------------------
+       0      0      4      0  AlterTableStmt
+       2      0      0      0  CreateTableStmt
+       0      0      2      0  DropTableStmt
+       0    115      0      0  InsertStmt
+       0      0      2      0  LockTablesStmt
+       0      0      2      0  UnlockTablesStmt
+See https://github.com/pingcap/parser for definitions of statement types
+(pingcap/tidb/parser is the library we use for parsing mysqldump output).
+
+No Name Changes in Migration
+----------------------------
+Table historical_data
+----------------------------
+Schema conversion: POOR (57% of 7 columns mapped cleanly).
+Data conversion: NONE (100% of 0 rows written to Spanner).
+
+Warnings
+1) Table 'historical_data': Some columns will consume more storage in Spanner
+   e.g. for column 'id', source DB type int(11) is mapped to Spanner data type
+   int64.
+2) Column 'id' is an autoincrement column in table 'historical_data'. Spanner
+   does not support auto_increment attribute.
+3) Some columns have source DB type 'datetime' which is mapped to Spanner type
+   timestamp in table 'historical_data' e.g. column 'timestamp'. Spanner
+   timestamp is closer to MySQL timestamp.
+
+----------------------------
+Table scorecard
+----------------------------
+Schema conversion: OK (84% of 19 columns mapped cleanly).
+Data conversion: NONE (100% of 0 rows written to Spanner).
+
+Warnings
+1) Table 'scorecard': Some columns will consume more storage in Spanner e.g. for
+   column 'id', source DB type int(11) is mapped to Spanner data type int64.
+2) Column 'id' is an autoincrement column in table 'scorecard'. Spanner does not
+   support auto_increment attribute.
+3) Some columns have source DB type 'datetime' which is mapped to Spanner type
+   timestamp in table 'scorecard' e.g. column 'timestamp'. Spanner timestamp is
+   closer to MySQL timestamp.
+
+Note
+1) Some columns have default values which Spanner migration tool does not
+   migrate. Please add the default constraints manually after the migration is
+   complete for table 'scorecard' e.g. column 'created_at'.
+
+----------------------------
+Unexpected Conditions
+----------------------------
+There were no unexpected conditions encountered during processing.
+

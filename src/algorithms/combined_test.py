@@ -16,6 +16,11 @@ class CombinedStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        # Initialize attributes
+        self.returns = []
+        self.wins = 0
+        self.losses = 0
+
         # Existing initialization code...
         self.dataclose = self.datas[0].close
 

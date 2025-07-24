@@ -1,10 +1,10 @@
-<!-- templates/index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Interactive Backtesting Platform</title>
+    <title>Infxnity Backtesting Tool</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Include Vue.js via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <!-- Include Axios via CDN -->
@@ -13,117 +13,306 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <div id="app">
-        <h1>Interactive Backtesting Platform</h1>
+    <div id="app" class="container">
+        <h1 class="my-4">Infxnity backtesting tool</h1>
 
-        <!-- Parameters Form -->
-        <div>
-            <label>Mean Reversion Window:</label>
-            <input v-model.number="meanRevWindow" type="number" min="1" />
+        <div class="row">
+            <!-- Parameters Form -->
+            <div class="col-md-3">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Strategy Parameters
+                    </div>
+                    <div class="card-body">
+                        <!-- Parameter Inputs -->
+                        <div class="form-group">
+                            <label for="meanRevWindow">Mean Reversion Window:</label>
+                            <input v-model.number="meanRevWindow" type="number" min="1" class="form-control" id="meanRevWindow">
+                        </div>
+                        <div class="form-group">
+                            <label for="stdDevMultiplier">Std Dev Multiplier:</label>
+                            <input v-model.number="stdDevMultiplier" type="number" step="0.1" class="form-control" id="stdDevMultiplier">
+                        </div>
+                        <div class="form-group">
+                            <label>ARIMA Order (p, d, q):</label>
+                            <div class="form-row">
+                                <div class="col">
+                                    <input v-model.number="arimaP" type="number" min="0" class="form-control" placeholder="p">
+                                </div>
+                                <div class="col">
+                                    <input v-model.number="arimaD" type="number" min="0" class="form-control" placeholder="d">
+                                </div>
+                                <div class="col">
+                                    <input v-model.number="arimaQ" type="number" min="0" class="form-control" placeholder="q">
+                                </div>
+                            </div>
+                        </div>
+                        <button @click="runBacktest" class="btn btn-primary mt-3">Run Backtest</button>
+                    </div>
+                </div>
+            </div>
 
-            <label>Std Dev Multiplier:</label>
-            <input v-model.number="stdDevMultiplier" type="number" step="0.1" />
+            <!-- Results and Chart -->
+            <div class="col-md-9">
+                <!-- Loading Indicator -->
+                <div v-if="loading" class="alert alert-info">Running backtest...</div>
+                <!-- Error Message -->
+                <div v-if="error" class="alert alert-danger">[[ error ]]</div>
 
-            <label>ARIMA Order (p, d, q):</label>
-            <input v-model.number="arimaP" type="number" min="0" />
-            <input v-model.number="arimaD" type="number" min="0" />
-            <input v-model.number="arimaQ" type="number" min="0" />
+                <!-- Chart -->
+                <div class="card mb-4">
+                    <div class="card-header">Chart</div>
+                    <div class="card-body">
+                        <div id="equity-chart"></div>
+                    </div>
+                </div>
 
-            <button @click="runBacktest">Run Backtest</button>
-        </div>
-
-        <!-- Loading Indicator -->
-        <div v-if="loading">Running backtest...</div>
-        <div v-if="error">{{ error }}</div>
-
-        <!-- Results -->
-        <div v-if="results">
-            <h2>Performance Metrics</h2>
-            <p>Starting Portfolio Value: $100,000</p>
-            <p>Final Portfolio Value: $[[ finalPortfolioValue.toFixed(2) ]]</p>
-            <p>Total Return: $[[ totalReturn.toFixed(2) ]]</p>
-            <p>Total Trades: [[ trades.total.closed ]]</p>
-            <p>Winning Trades: [[ trades.won.total ]]</p>
-            <p>Losing Trades: [[ trades.lost.total ]]</p>
-
-            <!-- Equity Curve Chart -->
-            <div id="equity-chart"></div>
+                <!-- Performance Metrics -->
+                <div v-if="results">
+                    <div class="card">
+                        <div class="card-header">
+                            Performance Metrics
+                        </div>
+                        <div class="card-body">
+                            <p>Starting Portfolio Value: $100,000</p>
+                            <p>Final Portfolio Value: $[[ finalPortfolioValue.toFixed(2) ]]</p>
+                            <p>Total Return: $[[ totalReturn.toFixed(2) ]]</p>
+                            <p>Total Trades: [[ trades.total.closed ]]</p>
+                            <p>Winning Trades: [[ trades.won.total ]]</p>
+                            <p>Losing Trades: [[ trades.lost.total ]]</p>
+                            <!-- Uncomment and compute marginLevel if available -->
+                            <!-- <p>Margin Level: [[ marginLevel.toFixed(2) ]]%</p> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Include Bootstrap JS (Optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        new Vue({
-            el: '#app',
-            data: {
-                meanRevWindow: 20,
-                stdDevMultiplier: 2.0,
-                arimaP: 5,
-                arimaD: 1,
-                arimaQ: 0,
-                results: null,
-                loading: false,
-                error: null
+    new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data: {
+            meanRevWindow: 20,
+            stdDevMultiplier: 2.0,
+            arimaP: 5,
+            arimaD: 1,
+            arimaQ: 0,
+            results: null,
+            loading: false,
+            error: null,
+            priceData: null
+        },
+        computed: {
+            finalPortfolioValue() {
+                return 100000 + (this.results ? this.results.total_return : 0);
             },
-            computed: {
-                finalPortfolioValue() {
-                    return 100000 + this.results.total_return;
-                },
-                totalReturn() {
-                    return this.results.total_return;
-                },
-                trades() {
-                    return this.results.trades;
-                }
+            totalReturn() {
+                return this.results ? this.results.total_return : 0;
             },
-            methods: {
-                runBacktest() {
-                    this.loading = true;
-                    this.error = null;
-                    this.results = null;
-
-                    const params = {
-                        mean_rev_window: this.meanRevWindow,
-                        std_dev_multiplier: this.stdDevMultiplier,
-                        arima_order: [this.arimaP, this.arimaD, this.arimaQ]
-                    };
-
-                    axios.post('/run_backtest', params)
-                        .then(response => {
-                            this.results = response.data;
-                            if (this.results.error) {
-                                this.error = this.results.error;
-                            } else {
-                                this.plotEquityCurve();
-                            }
-                        })
-                        .catch(error => {
-                            this.error = 'Error running backtest.';
-                            console.error(error);
-                        })
-                        .finally(() => {
-                            this.loading = false;
-                        });
-                },
-                plotEquityCurve() {
-                    const equityCurve = this.results.equity_curve;
-                    const data = [{
-                        x: equityCurve.map(point => point.datetime),
-                        y: equityCurve.map(point => point.equity),
-                        type: 'scatter',
-                        mode: 'lines',
-                        name: 'Equity Curve'
-                    }];
-
-                    const layout = {
-                        title: 'Equity Curve',
-                        xaxis: { title: 'Date' },
-                        yaxis: { title: 'Equity ($)' }
-                    };
-
-                    Plotly.newPlot('equity-chart', data, layout);
-                }
+            trades() {
+                return this.results ? this.results.trades : {};
             }
-        });
+            // Uncomment and compute marginLevel if available
+            // marginLevel() {
+            //     return (this.results ? this.results.margin_level : 0);
+            // }
+        },
+        methods: {
+            runBacktest() {
+                this.loading = true;
+                this.error = null;
+                this.results = null;
+
+                const params = {
+                    mean_rev_window: this.meanRevWindow,
+                    std_dev_multiplier: this.stdDevMultiplier,
+                    arima_order: [this.arimaP, this.arimaD, this.arimaQ]
+                };
+
+                axios.post('/run_backtest', params)
+                    .then(response => {
+                        this.results = response.data;
+                        if (this.results.error) {
+                            this.error = this.results.error;
+                        } else {
+                            this.plotEquityCurve();
+                        }
+                    })
+                    .catch(error => {
+                        this.error = 'Error running backtest.';
+                        console.error(error);
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
+            plotCandlestickChart() {
+                const priceData = this.priceData;
+                if (!priceData || priceData.length === 0) {
+                    this.error = 'No price data available.';
+                    return;
+                }
+
+                // Ensure data is sorted by datetime
+                priceData.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+                const data = [{
+                    x: priceData.map(point => new Date(point.datetime)),
+                    open: priceData.map(point => point.open_price),
+                    high: priceData.map(point => point.high_price),
+                    low: priceData.map(point => point.low_price),
+                    close: priceData.map(point => point.close_price),
+                    type: 'candlestick',
+                    name: 'Price Data'
+                }];
+
+                const layout = {
+                    title: 'Price Chart',
+                    xaxis: {
+                        title: 'Date',
+                        rangeslider: { visible: true },
+                        rangeselector: {
+                            buttons: [
+                                {
+                                    count: 1,
+                                    label: '1h',
+                                    step: 'hour',
+                                    stepmode: 'backward'
+                                },
+                                {
+                                    count: 6,
+                                    label: '6h',
+                                    step: 'hour',
+                                    stepmode: 'backward'
+                                },
+                                {
+                                    count: 1,
+                                    label: '1d',
+                                    step: 'day',
+                                    stepmode: 'backward'
+                                },
+                                {
+                                    count: 7,
+                                    label: '1w',
+                                    step: 'day',
+                                    stepmode: 'backward'
+                                },
+                                { step: 'all' }
+                            ]
+                        }
+                    },
+                    yaxis: { title: 'Price' },
+                    height: 600,
+                    margin: { t: 50, b: 50 }
+                };
+
+                Plotly.newPlot('equity-chart', data, layout);
+            },
+
+            plotEquityCurve() {
+                const priceData = this.priceData;
+                const equityCurve = this.results.equity_curve;
+
+                if (!priceData || !priceData.length || !equityCurve || !equityCurve.length) {
+                    this.error = 'No data available to plot equity curve.';
+                    return;
+                }
+
+                // Ensure data is sorted by datetime
+                priceData.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+                equityCurve.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+                const candlestickTrace = {
+                    x: priceData.map(point => new Date(point.datetime)),
+                    open: priceData.map(point => point.open_price),
+                    high: priceData.map(point => point.high_price),
+                    low: priceData.map(point => point.low_price),
+                    close: priceData.map(point => point.close_price),
+                    type: 'candlestick',
+                    name: 'Price Data',
+                    xaxis: 'x',
+                    yaxis: 'y'
+                };
+
+                const equityTrace = {
+                    x: equityCurve.map(point => new Date(point.datetime)),
+                    y: equityCurve.map(point => point.equity),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Equity Curve',
+                    xaxis: 'x',
+                    yaxis: 'y2',
+                    line: { color: 'blue' }
+                };
+
+                const data = [candlestickTrace, equityTrace];
+
+                const layout = {
+                    title: 'Price Chart with Equity Curve',
+                    xaxis: {
+                        title: 'Date',
+                        rangeslider: { visible: true },
+                        rangeselector: {
+                            buttons: [
+                                {
+                                    count: 1,
+                                    label: '1h',
+                                    step: 'hour',
+                                    stepmode: 'backward'
+                                },
+                                {
+                                    count: 6,
+                                    label: '6h',
+                                    step: 'hour',
+                                    stepmode: 'backward'
+                                },
+                                {
+                                    count: 1,
+                                    label: '1d',
+                                    step: 'day',
+                                    stepmode: 'backward'
+                                },
+                                {
+                                    count: 7,
+                                    label: '1w',
+                                    step: 'day',
+                                    stepmode: 'backward'
+                                },
+                                { step: 'all' }
+                            ]
+                        }
+                    },
+                    yaxis: { title: 'Price', side: 'left' },
+                    yaxis2: { title: 'Equity', overlaying: 'y', side: 'right' },
+                    height: 600,
+                    margin: { t: 50, b: 50 }
+                };
+
+                Plotly.newPlot('equity-chart', data, layout);
+            }
+        },
+        mounted() {
+            // Fetch price data when the app is mounted
+            axios.get('/get_price_data')
+                .then(response => {
+                    if (response.data.error) {
+                        this.error = response.data.error;
+                    } else {
+                        this.priceData = response.data.price_data;
+                        this.plotCandlestickChart();
+                    }
+                })
+                .catch(error => {
+                    this.error = 'Error fetching price data.';
+                    console.error(error);
+                });
+        }
+    });
     </script>
 </body>
 </html>
